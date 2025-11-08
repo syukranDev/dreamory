@@ -10,6 +10,15 @@ import UserPortal from './pages/UserPortal'
 const theme = createTheme({
   palette: {
     mode: 'light',
+    primary: {
+      main: '#ff9800', //notedevv: oren
+      light: '#ffb74d',
+      dark: '#f57c00',
+      contrastText: '#fff',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
   },
 })
 

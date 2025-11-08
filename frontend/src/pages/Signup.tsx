@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -8,34 +9,53 @@ import {
   Typography,
   Box,
   Alert,
+  CircularProgress,
 } from '@mui/material'
+import { authService } from '../services/auth.service'
 
 interface SignupFormData {
-  name: string
+  fullName: string
   email: string
   password: string
 }
 
 function Signup() {
   const navigate = useNavigate()
+  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
   const {
     control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<SignupFormData>({
     defaultValues: {
-      name: '',
+      fullName: '',
       email: '',
       password: ''
     },
   })
 
-  const password = watch('password')
-
-  const onSubmit = (_data: SignupFormData) => {
-    // TBA connect to API
-    navigate('/dashboard')
+  const onSubmit = async (data: SignupFormData) => {
+    setError('')
+    setLoading(true)
+    try {
+      const response = await authService.signup({
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+      })
+      
+      localStorage.setItem('token', response.token)
+      
+      navigate('/dashboard')
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          'Signup failed. Please try again.'
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -66,19 +86,24 @@ function Signup() {
             onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 1, width: '100%' }}
           >
-            {(errors.name || errors.email || errors.password) && (
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            {(errors.fullName || errors.email || errors.password) && !error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 Please correct the errors below
               </Alert>
             )}
             <Controller
-              name="name"
+              name="fullName"
               control={control}
               rules={{
-                required: 'Name is required',
+                required: 'Full name is required',
                 minLength: {
                   value: 2,
-                  message: 'Name must be at least 2 characters',
+                  message: 'Full name must be at least 2 characters',
                 },
               }}
               render={({ field }) => (
@@ -87,13 +112,13 @@ function Signup() {
                   margin="normal"
                   required
                   fullWidth
-                  id="name"
+                  id="fullName"
                   label="Full Name"
-                  name="name"
+                  name="fullName"
                   autoComplete="name"
                   autoFocus
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
+                  error={!!errors.fullName}
+                  helperText={errors.fullName?.message}
                 />
               )}
             />
@@ -128,8 +153,12 @@ function Signup() {
               rules={{
                 required: 'Password is required',
                 minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
+                },
+                maxLength: {
+                  value: 20,
+                  message: 'Password must be less than 20 characters',
                 },
               }}
               render={({ field }) => (
@@ -154,8 +183,9 @@ function Signup() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              Sign Up
+              {loading ? <CircularProgress size={24} /> : 'Sign Up'}
             </Button>
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Typography variant="body2">
