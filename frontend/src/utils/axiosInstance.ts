@@ -25,7 +25,7 @@ axiosInstance.interceptors.response.use((response) => {
 }, (error) => {
     // notedev: let component handle the error
     const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
-                          error.config?.url?.includes('/auth/register')
+                          error.config?.url?.includes('/auth/signup')
     
     if (error.response?.status === 401 && !isAuthEndpoint) {
         localStorage.removeItem('token')
