@@ -11,5 +11,8 @@ export const API_PATH = {
         GET_EVENT_DATA_BY_ID: { path: '/api/v1/events/:id', method: 'GET' },
         UPDATE_EVENT: { path: '/api/v1/events/:id', method: 'PATCH' },
         DELETE_EVENT: { path: '/api/v1/events/:id', method: 'DELETE' },
+    },
+    UPLOAD: {
+        IMAGE: { path: '/api/v1/upload/image', method: 'POST' },
     }
 }
