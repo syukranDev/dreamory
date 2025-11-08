@@ -12,8 +12,11 @@ export class EventsService {
             data: {
                 title: createEventDto.title,
                 description: createEventDto.description,
+                location: createEventDto.location,
+                imageUrl: createEventDto.imageUrl ?? null,
+                status: createEventDto.status ?? 'ongoing',
                 eventDate: new Date(createEventDto.event_date),
-                eventTime: createEventDto.event_time
+                eventTime: createEventDto.event_time,
             }
         });
     }
@@ -44,7 +47,7 @@ export class EventsService {
         if (updateEventDto.title) updateData.title = updateEventDto.title;
         if (updateEventDto.description) updateData.description = updateEventDto.description;
         if (updateEventDto.location) updateData.location = updateEventDto.location;
-        if (updateEventDto.imageUrl) updateData.imageUrl = updateEventDto.imageUrl;
+        if (updateEventDto.imageUrl) updateData.imageUrl = updateEventDto.imageUrl ?? null;
         if (updateEventDto.status) updateData.status = 'ongoing';
         if (updateEventDto.event_date) updateData.eventDate = new Date(updateEventDto.event_date);
         if (updateEventDto.event_time) updateData.eventTime = updateEventDto.event_time;

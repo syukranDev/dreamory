@@ -18,7 +18,6 @@ export class UpdateEventDto {
     imageUrl?: string;
 
     @IsString()
-    @IsOptional()
     status?: string;
 
     @IsDateString()

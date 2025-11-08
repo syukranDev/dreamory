@@ -23,6 +23,9 @@ model Event {
   id          Int      @id @default(autoincrement())
   title       String
   description String   @db.Text
+  location    String 
+  imageUrl    String?  @map("image_url")
+  status      String   
   eventDate   DateTime @map("event_date") @db.Date
   eventTime   String   @map("event_time")
   createdAt   DateTime @default(now()) @map("created_at")

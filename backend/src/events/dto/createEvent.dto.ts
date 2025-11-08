@@ -9,6 +9,17 @@ export class CreateEventDto {
     @IsNotEmpty()
     description: string;
 
+    @IsString()
+    @IsNotEmpty()
+    location: string;
+
+    @IsString()
+    @IsNotEmpty()
+    imageUrl: string;
+
+    @IsString()
+    status?: string;
+
     @IsDateString()
     @IsNotEmpty()
     event_date: string;
