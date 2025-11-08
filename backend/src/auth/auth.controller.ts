@@ -2,13 +2,11 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { RegisterUserDto } from '../users/dto/registerUser.dto';
-import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
-        private readonly usersService: UsersService,
     ) {}
 
     @Post('login')
@@ -18,6 +16,6 @@ export class AuthController {
 
     @Post('signup')
     async signup(@Body() registerUserDto: RegisterUserDto) {
-        return this.usersService.createNewUser(registerUserDto);
+        return this.authService.signup(registerUserDto);
     }
 }

@@ -2,14 +2,14 @@ export const BASE_URL = 'http://localhost:5000'
 
 export const API_PATH = {
     AUTH: {
-        LOGIN: '/api/v1/auth/login',
-        REGISTER: '/api/v1/auth/register',
+        LOGIN: { path: '/api/v1/auth/login', method: 'POST' },
+        SIGNUP: { path: '/api/v1/auth/signup', method: 'POST' },
     },
     EVENT: {
-        ADD_EVENT: '/api/v1/event/addEvent',
-        GET_ALL_EVENT_DATA: '/api/v1/event/getAllEvent',
-        GET_EVENT_DATA_BY_ID: '/api/v1/event/getEventById/:id',
-        UPDATE_EVENT: '/api/v1/event/updateEvent/:id',
-        DELETE_EVENT: '/api/v1/event/deleteEvent/:id',
+        ADD_EVENT: { path: '/api/v1/events', method: 'POST' },
+        GET_ALL_EVENT_DATA: { path: '/api/v1/events', method: 'GET' },
+        GET_EVENT_DATA_BY_ID: { path: '/api/v1/events/:id', method: 'GET' },
+        UPDATE_EVENT: { path: '/api/v1/events/:id', method: 'PATCH' },
+        DELETE_EVENT: { path: '/api/v1/events/:id', method: 'DELETE' },
     }
 }
