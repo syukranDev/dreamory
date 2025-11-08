@@ -59,7 +59,7 @@ export class EventsService {
     }
 
     async remove(id: number) {
-        await this.findOne(id); // Check if exists
+        await this.findOne(id);
         
         await this.prisma.event.delete({
             where: { id }
