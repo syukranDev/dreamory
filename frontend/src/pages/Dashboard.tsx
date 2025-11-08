@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Typography,
   Box,
@@ -14,12 +15,14 @@ import {
   Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import LogoutIcon from '@mui/icons-material/Logout';
 import EventTable from '../components/EventTable';
 import EventDialog from '../components/EventDialog';
 import { eventService } from '../services/event.service';
 import type { Event, EventFormData } from '../types/event.types';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +31,11 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventToDelete, setEventToDelete] = useState<number | null>(null);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   useEffect(() => {
     fetchEvents();
@@ -140,9 +148,19 @@ function Dashboard() {
     <Box sx={{ width: '100%', height: '100vh', backgroundColor: '#f5f5f5', margin: 0, padding: 0 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Event Dashboard (Admin Portal)
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+            <Typography variant="h6" component="div">
+              Event Dashboard (Admin Portal)
+            </Typography>
+            <Button
+              color="inherit"
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout}
+              sx={{ textTransform: 'none' }}
+            >
+              Logout
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
 
