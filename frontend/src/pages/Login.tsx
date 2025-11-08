@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -8,7 +9,9 @@ import {
   Typography,
   Box,
   Alert,
+  CircularProgress,
 } from '@mui/material'
+import { authService } from '../services/auth.service'
 
 interface LoginFormData {
   email: string
@@ -17,6 +20,8 @@ interface LoginFormData {
 
 function Login() {
   const navigate = useNavigate()
+  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
   const {
     control,
     handleSubmit,
@@ -28,9 +33,26 @@ function Login() {
     },
   })
 
-  const onSubmit = (_data: LoginFormData) => {
-    // TBA connect to API
-    navigate('/dashboard')
+  const onSubmit = async (data: LoginFormData) => {
+    setError('')
+    setLoading(true)
+    try {
+      const response = await authService.login({
+        email: data.email,
+        password: data.password,
+      })
+      
+      localStorage.setItem('token', response.token)
+     
+      navigate('/dashboard')
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          'Login failed. Please check your credentials and try again.'
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,7 +83,12 @@ function Login() {
             onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 1, width: '100%' }}
           >
-            {(errors.email || errors.password) && (
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            {(errors.email || errors.password) && !error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 Please fill in all required fields
               </Alert>
@@ -123,8 +150,9 @@ function Login() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              Sign In
+              {loading ? <CircularProgress size={24} /> : 'Sign In'}
             </Button>
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Typography variant="body2">
