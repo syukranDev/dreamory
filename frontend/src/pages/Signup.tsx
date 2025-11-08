@@ -78,8 +78,8 @@ function Signup() {
             width: '100%',
           }}
         >
-          <Typography component="h1" variant="h4" gutterBottom>
-            Sign Up
+          <Typography component="h1" variant="h6" gutterBottom>
+           Admin Portal | Sign Up
           </Typography>
           <Box
             component="form"

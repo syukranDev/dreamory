@@ -75,8 +75,8 @@ function Login() {
             width: '100%',
           }}
         >
-          <Typography component="h1" variant="h4" gutterBottom>
-            Login
+          <Typography component="h1" variant="h6" gutterBottom>
+            Admin Portal | Login
           </Typography>
           <Box
             component="form"
