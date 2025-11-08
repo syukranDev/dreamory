@@ -9,6 +9,18 @@ export class UpdateEventDto {
     @IsOptional()
     description?: string;
 
+    @IsString()
+    @IsOptional()
+    location?: string;
+
+    @IsString()
+    @IsOptional()
+    imageUrl?: string;
+
+    @IsString()
+    @IsOptional()
+    status?: string;
+
     @IsDateString()
     @IsOptional()
     event_date?: string;
