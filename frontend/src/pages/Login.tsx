@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
 import {
   Container,
@@ -10,24 +10,26 @@ import {
   Alert,
 } from '@mui/material'
 
+interface LoginFormData {
+  email: string
+  password: string
+}
+
 function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    // Basic validation
-    if (!email || !password) {
-      setError('Please fill in all fields')
-      return
-    }
-
-    // For now, just redirect to dashboard
-    // In a real app, you would make an API call here
+  const onSubmit = (_data: LoginFormData) => {
+    // TBA connect to API
     navigate('/dashboard')
   }
 
@@ -56,37 +58,65 @@ function Login() {
           </Typography>
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 1, width: '100%' }}
           >
-            {error && (
+            {(errors.email || errors.password) && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
+                Please fill in all required fields
               </Alert>
             )}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
+            <Controller
               name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              control={control}
+              rules={{
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address',
+                },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  autoFocus
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                />
+              )}
             />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
+            <Controller
               name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              control={control}
+              rules={{
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters',
+                },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="current-password"
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
+                />
+              )}
             />
             <Button
               type="submit"
