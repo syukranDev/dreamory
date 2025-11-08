@@ -27,8 +27,7 @@ function Signup() {
     defaultValues: {
       name: '',
       email: '',
-      password: '',
-      confirmPassword: '',
+      password: ''
     },
   })
 
