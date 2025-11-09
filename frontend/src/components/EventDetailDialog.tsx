@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,6 +14,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DescriptionIcon from '@mui/icons-material/Description';
+import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 import type { Event } from '../types/event.types';
 
 interface EventDetailDialogProps {
@@ -27,6 +28,12 @@ const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
   onClose,
   event,
 }) => {
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [event?.imageUrl]);
+
   if (!event) return null;
 
   const getStatusColor = (status: string) => {
@@ -73,27 +80,47 @@ const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {event.imageUrl && (
-            <Box
-              sx={{
-                width: '100%',
-                height: 300,
-                borderRadius: 2,
-                overflow: 'hidden',
-                bgcolor: 'grey.200',
-              }}
-            >
+          <Box
+            sx={{
+              width: '100%',
+              height: 300,
+              borderRadius: 2,
+              overflow: 'hidden',
+              bgcolor: 'grey.200',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {event.imageUrl && !imageError ? (
               <img
                 src={event.imageUrl}
                 alt={event.title}
+                onError={() => setImageError(true)}
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
                 }}
               />
-            </Box>
-          )}
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  color: 'text.secondary',
+                }}
+              >
+                <ImageNotSupportedIcon sx={{ fontSize: 64 }} color="disabled" />
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  No image available
+                </Typography>
+              </Box>
+            )}
+          </Box>
 
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
