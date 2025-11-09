@@ -22,7 +22,13 @@ export class EventsService {
         });
     }
 
-    async findAll(params?: { sortColumn?: string; sortOrder?: 'asc' | 'desc'; keyword?: string }) {
+    async findAll(params?: {
+        sortColumn?: string;
+        sortOrder?: 'asc' | 'desc';
+        keyword?: string;
+        page?: number;
+        pageSize?: number;
+    }) {
         const allowedSortColumns: Record<string, string> = {
             id: 'id',
             title: 'title',
@@ -53,10 +59,28 @@ export class EventsService {
             [sortColumn]: sortOrder,
         };
 
-        return this.prisma.event.findMany({
-            where,
-            orderBy,
-        });
+        const page = params?.page && params.page > 0 ? params.page : 1;
+        const pageSize = 10
+
+        const [data, total] = await this.prisma.$transaction([
+            this.prisma.event.findMany({
+                where,
+                orderBy,
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            this.prisma.event.count({ where }),
+        ]);
+
+        return {
+            data,
+            pagination: {
+                total,
+                page,
+                pageSize,
+                totalPages: total / pageSize,
+            },
+        };
     }
 
     async findOne(id: number) {

@@ -19,8 +19,16 @@ export class EventsController {
         @Query('sortColumn') sortColumn?: string,
         @Query('sortOrder') sortOrder?: 'asc' | 'desc',
         @Query('keyword') keyword?: string,
+        @Query('page') page?: string,
+        @Query('pageSize') pageSize?: string,
     ) {
-        return this.eventsService.findAll({ sortColumn, sortOrder, keyword });
+        return this.eventsService.findAll({
+            sortColumn,
+            sortOrder,
+            keyword,
+            page: page ? parseInt(page, 10) : undefined,
+            pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
+        });
     }
 
     @Get(':id')
