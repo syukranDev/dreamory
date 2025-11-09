@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -12,6 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material'
 import { authService } from '../services/auth.service'
+import { useAuth } from '../context/AuthContext'
 
 interface LoginFormData {
   email: string
@@ -22,6 +23,7 @@ function Login() {
   const navigate = useNavigate()
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const { login, token } = useAuth()
   const {
     control,
     handleSubmit,
@@ -33,6 +35,12 @@ function Login() {
     },
   })
 
+  useEffect(() => {
+    if (token) {
+      navigate('/dashboard')
+    }
+  }, [token, navigate])
+
   const onSubmit = async (data: LoginFormData) => {
     setError('')
     setLoading(true)
@@ -41,9 +49,9 @@ function Login() {
         email: data.email,
         password: data.password,
       })
-      
-      localStorage.setItem('token', response.token)
-     
+
+      login(response.token, response.user)
+
       navigate('/dashboard')
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 
