@@ -24,9 +24,9 @@ const EventCardView: React.FC<EventCardViewProps> = ({ event, onClick }) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'ongoing':
-        return 'success';
+        return 'primary';
       case 'upcoming':
-        return 'success';
+        return 'info';
       case 'completed':
         return 'success';
       case 'cancelled':
