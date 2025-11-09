@@ -1,12 +1,105 @@
-import { Container, Typography } from '@mui/material'
+import { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Box,
+  AppBar,
+  Toolbar,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
+import EventListView from '../components/EventListView';
+import EventDetailDialog from '../components/EventDetailDialog';
+import { eventService } from '../services/event.service';
+import type { Event } from '../types/event.types';
 
 function UserPortal() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await eventService.getAllEvents();
+      setEvents(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCardClick = (event: Event) => {
+    setSelectedEvent(event);
+    setDetailDialogOpen(true);
+  };
+
+  const handleCloseDetailDialog = () => {
+    setDetailDialogOpen(false);
+    setSelectedEvent(null);
+  };
+
   return (
-    <Container>
-      <Typography component="p" variant="body1">
-        User Portal
-      </Typography>
-    </Container>
-  )
+    <Box sx={{ width: '100%', height: '100vh', backgroundColor: '#f5f5f5', margin: 0, padding: 0 }}>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            User Portal (Public View)
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth={events.length === 0 ? false : 'lg'} sx={{ py: 0, px: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 0,
+            p: 2,
+          }}
+        >
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
+            List of Events
+          </Typography>
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3, mx: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Box sx={{ p: 2 }}>
+            <EventListView
+              events={events}
+              onCardClick={handleCardClick}
+            />
+          </Box>
+        )}
+
+        <EventDetailDialog
+          open={detailDialogOpen}
+          onClose={handleCloseDetailDialog}
+          event={selectedEvent}
+        />
+      </Container>
+    </Box>
+  );
 }
-export default UserPortal
+
+export default UserPortal;
+
