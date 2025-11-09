@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/createEvent.dto';
 import { UpdateEventDto } from './dto/updateEvent.dto';
@@ -15,8 +15,12 @@ export class EventsController {
     }
 
     @Get()
-    findAll() {
-        return this.eventsService.findAll();
+    findAll(
+        @Query('sortColumn') sortColumn?: string,
+        @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+        @Query('keyword') keyword?: string,
+    ) {
+        return this.eventsService.findAll({ sortColumn, sortOrder, keyword });
     }
 
     @Get(':id')

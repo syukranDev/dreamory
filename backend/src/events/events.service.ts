@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto } from './dto/createEvent.dto';
 import { UpdateEventDto } from './dto/updateEvent.dto';
@@ -21,9 +22,40 @@ export class EventsService {
         });
     }
 
-    async findAll() {
+    async findAll(params?: { sortColumn?: string; sortOrder?: 'asc' | 'desc'; keyword?: string }) {
+        const allowedSortColumns: Record<string, string> = {
+            id: 'id',
+            title: 'title',
+            status: 'status',
+            eventDate: 'eventDate',
+            createdAt: 'createdAt',
+            updatedAt: 'updatedAt',
+        };
+
+        const sortColumn =
+            params?.sortColumn && allowedSortColumns[params.sortColumn]
+                ? allowedSortColumns[params.sortColumn]
+                : 'createdAt';
+        const sortOrder = params?.sortOrder === 'asc' ? 'asc' : 'desc';
+
+        const keyword = params?.keyword?.trim();
+
+        const where: Prisma.EventWhereInput | undefined = keyword
+            ? {
+                  OR: [
+                      { title: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+                      { description: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+                  ],
+              }
+            : undefined;
+
+        const orderBy: Prisma.EventOrderByWithRelationInput = {
+            [sortColumn]: sortOrder,
+        };
+
         return this.prisma.event.findMany({
-            orderBy: { createdAt: 'desc' }
+            where,
+            orderBy,
         });
     }
 
