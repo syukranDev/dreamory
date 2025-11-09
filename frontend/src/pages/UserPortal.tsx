@@ -7,14 +7,16 @@ import {
   Toolbar,
   CircularProgress,
   Alert,
+  Button,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import EventListView from '../components/EventListView';
 import EventDetailDialog from '../components/EventDetailDialog';
 import { eventService } from '../services/event.service';
 import type { Event } from '../types/event.types';
-
+import { useNavigate } from 'react-router-dom';
 function UserPortal() {
+  const navigate = useNavigate();
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
@@ -51,8 +53,9 @@ function UserPortal() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            User Portal (Public View)
+            User Portal (Public View) 
           </Typography>
+          <Button color="inherit" onClick={() => navigate('/dashboard')}>Admin Login</Button>
         </Toolbar>
       </AppBar>
 
