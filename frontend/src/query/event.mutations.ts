@@ -4,7 +4,7 @@ import type { EventFormData } from '../types/event.types';
 import { eventService } from '../services/event.service';
 
 type UpdateEventVariables = {
-  id: string;
+  id: number;
   data: EventFormData;
 };
 
@@ -14,21 +14,21 @@ export const useEventMutations = (queryKey: QueryKey = ['events']) => {
   const createEventMutation = useMutation({
     mutationFn: (formData: EventFormData) => eventService.createEvent(formData),
     onSuccess: () => {
-      queryClient.invalidateQuerie({ queryKey });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
   const updateEventMutation = useMutation({
     mutationFn: ({ id, data }: UpdateEventVariables) => eventService.updateEvent(id, data),
     onSuccess: () => {
-      queryClient.invalidateQuerie({ queryKey });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
   const deleteEventMutation = useMutation({
     mutationFn: (id: number) => eventService.deleteEvent(id),
     onSuccess: () => {
-      queryClient.invalidateQuerie({ queryKey });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
