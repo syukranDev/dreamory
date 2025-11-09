@@ -169,6 +169,10 @@ function Login() {
                   Sign Up
                 </Link>
               </Typography>
+              <Typography variant="body2">
+                Want to see upcoming events? {' '}
+                <Link to="/user_portal" style={{ textDecoration: 'none' }}>Click here</Link>
+              </Typography>
             </Box>
           </Box>
         </Paper>
