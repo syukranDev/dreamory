@@ -60,7 +60,8 @@ export class EventsService {
         };
 
         const page = params?.page && params.page > 0 ? params.page : 1;
-        const pageSize = 10
+        const pageSize =
+            params?.pageSize && params.pageSize > 0 && params.pageSize <= 100 ? params.pageSize : 10;
 
         const [data, total] = await this.prisma.$transaction([
             this.prisma.event.findMany({
@@ -78,7 +79,7 @@ export class EventsService {
                 total,
                 page,
                 pageSize,
-                totalPages: total / pageSize,
+                totalPages: Math.ceil(total / pageSize),
             },
         };
     }
