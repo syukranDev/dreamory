@@ -20,6 +20,7 @@ import EventTable from '../components/EventTable';
 import EventDialog from '../components/EventDialog';
 import { eventService } from '../services/event.service';
 import type { Event, EventFormData } from '../types/event.types';
+import { useAuth } from '../context/AuthContext';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -31,9 +32,10 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventToDelete, setEventToDelete] = useState<number | null>(null);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
   };
 
