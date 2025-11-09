@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,6 +10,7 @@ import {
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 import type { Event } from '../types/event.types';
 
 interface EventCardViewProps {
@@ -18,6 +19,8 @@ interface EventCardViewProps {
 }
 
 const EventCardView: React.FC<EventCardViewProps> = ({ event, onClick }) => {
+  const [imageError, setImageError] = useState(false);
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'ongoing':
@@ -63,20 +66,24 @@ const EventCardView: React.FC<EventCardViewProps> = ({ event, onClick }) => {
         },
       }}
     >
-      {event.imageUrl && (
-        <Box
-          sx={{
-            position: 'relative',
-            height: 220,
-            overflow: 'hidden',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          }}
-        >
+      <Box
+        sx={{
+          position: 'relative',
+          height: 220,
+          overflow: 'hidden',
+          background: 'grey',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {event.imageUrl && !imageError ? (
           <CardMedia
             component="img"
             height="220"
             image={event.imageUrl}
             alt={event.title}
+            onError={() => setImageError(true)}
             sx={{
               objectFit: 'cover',
               width: '100%',
@@ -86,56 +93,46 @@ const EventCardView: React.FC<EventCardViewProps> = ({ event, onClick }) => {
               },
             }}
           />
+        ) : (
           <Box
             sx={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              color: 'rgba(255, 255, 255, 0.85)',
             }}
           >
-            <Chip
-              label={event.status}
-              color={getStatusColor(event.status) as any}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                textTransform: 'capitalize',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                backdropFilter: 'blur(10px)',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              }}
-            />
-          </Box>
-        </Box>
-      )}
-      {!event.imageUrl && (
-        <Box
-          sx={{
-            height: 8,
-            background: 'linear-gradient(90deg, #ff9800 0%, #ffb74d 50%, #ff9800 100%)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 2s infinite',
-            '@keyframes shimmer': {
-              '0%': { backgroundPosition: '200% 0' },
-              '100%': { backgroundPosition: '-200% 0' },
-            },
-          }}
-        />
-      )}
-      <CardContent sx={{ flexGrow: 1, p: 3 }}>
-        {!event.imageUrl && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-            <Chip
-              label={event.status}
-              color={getStatusColor(event.status) as any}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                textTransform: 'capitalize',
-              }}
-            />
+            <ImageNotSupportedIcon sx={{ fontSize: 56 }} />
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              No image available
+            </Typography>
           </Box>
         )}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+          }}
+        >
+          <Chip
+            label={event.status}
+            color={getStatusColor(event.status) as any}
+            size="small"
+            sx={{
+              fontWeight: 600,
+              textTransform: 'capitalize',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+              backdropFilter: 'blur(10px)',
+              // backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            }}
+          />
+        </Box>
+      </Box>
+      <CardContent sx={{ flexGrow: 1, p: 3 }}>
+        
         <Typography
           variant="h6"
           component="h2"
