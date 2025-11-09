@@ -28,8 +28,13 @@ function UserPortal() {
     try {
       setLoading(true);
       setError(null);
-      const data = await eventService.getAllEvents();
-      setEvents(data);
+      const response = await eventService.getAllEvents({
+        sortColumn: 'eventDate',
+        sortOrder: 'asc',
+        page: 1,
+        pageSize: 99999999999,
+      });
+      setEvents(response.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch events');
     } finally {

@@ -1,11 +1,11 @@
 import axiosInstance from '../utils/axiosInstance'
 import { API_PATH } from '../utils/apiPath'
-import type { Event, EventFormData, EventResponse } from '../types/event.types'
+import type { Event, EventFormData, EventResponse, PaginatedResponse, PaginatedEventResponse } from '../types/event.types'
 
 const transformEventResponse = (response: EventResponse): Event => {
   const eventDate = new Date(response.eventDate)
   const formattedDate = eventDate.toISOString().split('T')[0]
-  
+
   return {
     id: response.id,
     title: response.title,
@@ -21,11 +21,24 @@ const transformEventResponse = (response: EventResponse): Event => {
 }
 
 export const eventService = {
-  async getAllEvents(): Promise<Event[]> {
-    const response = await axiosInstance.get<EventResponse[]>(
-      API_PATH.EVENT.GET_ALL_EVENT_DATA.path
+  async getAllEvents(params?: {
+    sortColumn?: string
+    sortOrder?: 'asc' | 'desc'
+    keyword?: string
+    page?: number
+    pageSize?: number
+  }): Promise<PaginatedEventResponse> {
+    const response = await axiosInstance.get<PaginatedResponse<EventResponse>>(
+      API_PATH.EVENT.GET_ALL_EVENT_DATA.path,
+      {
+        params,
+      }
     )
-    return response.data.map(transformEventResponse)
+
+    return {
+      data: response.data.data.map(transformEventResponse),
+      pagination: response.data.pagination,
+    }
   },
 
   async getEventById(id: number): Promise<Event> {

@@ -34,3 +34,17 @@ export interface EventFormData {
   event_time: string;
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
+
+export type PaginatedEventResponse = PaginatedResponse<Event>;
+

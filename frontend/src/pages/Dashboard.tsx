@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -13,13 +13,22 @@ import {
   Toolbar,
   CircularProgress,
   Alert,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TablePagination,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import LogoutIcon from '@mui/icons-material/Logout';
+import SearchIcon from '@mui/icons-material/Search';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import EventTable from '../components/EventTable';
 import EventDialog from '../components/EventDialog';
 import { eventService } from '../services/event.service';
-import type { Event, EventFormData } from '../types/event.types';
+import type { Event, EventFormData, PaginationMeta } from '../types/event.types';
 import { useAuth } from '../context/AuthContext';
 
 function Dashboard() {
@@ -32,6 +41,13 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [eventToDelete, setEventToDelete] = useState<number | null>(null);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+  const [sortColumn, setSortColumn] = useState<string>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const { logout } = useAuth();
 
   const handleLogout = () => {
@@ -39,22 +55,42 @@ function Dashboard() {
     navigate('/login');
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await eventService.getAllEvents();
-      setEvents(data);
+      const response = await eventService.getAllEvents({
+        sortColumn,
+        sortOrder,
+        keyword: debouncedSearchTerm || undefined,
+        page: page + 1,
+        pageSize: rowsPerPage,
+      });
+      setEvents(response.data);
+      setPagination(response.pagination);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch events');
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortColumn, sortOrder, debouncedSearchTerm, page, rowsPerPage]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim());
+      setPage(0);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [sortColumn, sortOrder]);
 
   const handleOpenCreateDialog = () => {
     setSelectedEvent(null);
@@ -76,8 +112,8 @@ function Dashboard() {
   const handleCreateEvent = async (formData: EventFormData) => {
     try {
       setError(null);
-      const newEvent = await eventService.createEvent(formData);
-      setEvents([...events, newEvent]);
+      await eventService.createEvent(formData);
+      await fetchEvents();
       handleCloseDialog();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create event');
@@ -89,10 +125,8 @@ function Dashboard() {
 
     try {
       setError(null);
-      const updatedEvent = await eventService.updateEvent(selectedEvent.id, formData);
-      setEvents(events.map(event =>
-        event.id === selectedEvent.id ? updatedEvent : event
-      ));
+      await eventService.updateEvent(selectedEvent.id, formData);
+      await fetchEvents();
       handleCloseDialog();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update event');
@@ -117,7 +151,7 @@ function Dashboard() {
       try {
         setError(null);
         await eventService.deleteEvent(eventToDelete);
-        setEvents(events.filter(event => event.id !== eventToDelete));
+        await fetchEvents();
         setEventToDelete(null);
         setDeleteDialogOpen(false);
       } catch (err: any) {
@@ -131,6 +165,15 @@ function Dashboard() {
   const handleDeleteCancel = () => {
     setEventToDelete(null);
     setDeleteDialogOpen(false);
+  };
+
+  const handlePageChange = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const getEventFormData = (event: Event | null): EventFormData | null => {
@@ -171,20 +214,68 @@ function Dashboard() {
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             p: 1.5,
+            gap: 1.5,
+            flexWrap: 'wrap',
           }}
         >
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}/>
-          
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleOpenCreateDialog}
-            sx={{ textTransform: 'none' }}
-          >
-            Create Event
-          </Button>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
+            Event Management
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            <TextField
+              size="small"
+              placeholder="Search events"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ minWidth: 220 }}
+            />
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel id="sort-column-label">Sort by</InputLabel>
+              <Select
+                labelId="sort-column-label"
+                value={sortColumn}
+                label="Sort by"
+                onChange={(event: SelectChangeEvent) => setSortColumn(event.target.value)}
+              >
+                <MenuItem value="createdAt">Created Date</MenuItem>
+                <MenuItem value="updatedAt">Updated Date</MenuItem>
+                <MenuItem value="eventDate">Event Date</MenuItem>
+                <MenuItem value="title">Title</MenuItem>
+                <MenuItem value="status">Status</MenuItem>
+                <MenuItem value="id">ID</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel id="sort-order-label">Order</InputLabel>
+              <Select
+                labelId="sort-order-label"
+                value={sortOrder}
+                label="Order"
+                onChange={(event: SelectChangeEvent) => setSortOrder(event.target.value as 'asc' | 'desc')}
+              >
+                <MenuItem value="desc">Descending</MenuItem>
+                <MenuItem value="asc">Ascending</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpenCreateDialog}
+              sx={{ textTransform: 'none' }}
+            >
+              Create Event
+            </Button>
+          </Box>
         </Box>
 
         {error && (
@@ -203,6 +294,16 @@ function Dashboard() {
               events={events}
               onEdit={handleOpenEditDialog}
               onDelete={handleDeleteClick}
+            />
+            <TablePagination
+              component="div"
+              count={pagination?.total ?? 0}
+              page={page}
+              onPageChange={handlePageChange}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleRowsPerPageChange}
+              rowsPerPageOptions={[5, 10, 20]}
+              sx={{ mt: 1 }}
             />
           </Box>
         )}

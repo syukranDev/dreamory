@@ -24,6 +24,7 @@ interface EventTableProps {
 }
 
 const EventTable: React.FC<EventTableProps> = ({ events, onEdit, onDelete }) => {
+  const cellPadding = 0.75;
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'ongoing':
@@ -79,36 +80,37 @@ const EventTable: React.FC<EventTableProps> = ({ events, onEdit, onDelete }) => 
   }
 
   return (
-    <TableContainer 
-      component={Paper} 
-      sx={{ 
-        borderRadius: 2, 
-        overflow: 'hidden',
+    <TableContainer
+      component={Paper}
+      sx={{
+        borderRadius: 2,
+        overflow: 'auto',
         width: '100%',
         maxHeight: '100%',
       }}
     >
-      <Table 
-        sx={{ 
+      <Table
+        sx={{
           width: '100%',
           tableLayout: 'auto',
-        }} 
+        }}
+        size="small"
         aria-label="events table"
         stickyHeader
       >
         <TableHead>
           <TableRow sx={{ bgcolor: 'primary.main' }}>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>ID</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Image</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Title</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Description</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Location</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Status</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Event Date</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Event Time</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Created At</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, py: 1 }}>Updated At</TableCell>
-            <TableCell sx={{ color: 'black', fontWeight: 600, textAlign: 'center', py: 1 }}>Actions</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>ID</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Image</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Title</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Description</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Location</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Status</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Event Date</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Event Time</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Created At</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, py: cellPadding }}>Updated At</TableCell>
+            <TableCell sx={{ color: 'black', fontWeight: 600, textAlign: 'center', py: cellPadding }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -124,19 +126,19 @@ const EventTable: React.FC<EventTableProps> = ({ events, onEdit, onDelete }) => 
                 },
               }}
             >
-              <TableCell sx={{ py: 1 }}>{event.id}</TableCell>
-              <TableCell sx={{ py: 1 }}>
+              <TableCell sx={{ py: cellPadding }}>{event.id}</TableCell>
+              <TableCell sx={{ py: cellPadding }}>
                 {event.imageUrl ? (
                   <Avatar
                     src={event.imageUrl}
                     alt={event.title}
                     variant="rounded"
-                    sx={{ width: 48, height: 48 }}
+                    sx={{ width: 40, height: 40 }}
                   />
                 ) : (
                   <Avatar
                     variant="rounded"
-                    sx={{ width: 48, height: 48, bgcolor: 'grey.300' }}
+                    sx={{ width: 40, height: 40, bgcolor: 'grey.300' }}
                   >
                     <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
                       No Image
@@ -144,12 +146,12 @@ const EventTable: React.FC<EventTableProps> = ({ events, onEdit, onDelete }) => 
                   </Avatar>
                 )}
               </TableCell>
-              <TableCell sx={{ py: 1 }}>
+              <TableCell sx={{ py: cellPadding }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {event.title}
                 </Typography>
               </TableCell>
-              <TableCell sx={{ py: 1 }}>
+              <TableCell sx={{ py: cellPadding }}>
                 <Typography
                   variant="body2"
                   sx={{
@@ -163,8 +165,8 @@ const EventTable: React.FC<EventTableProps> = ({ events, onEdit, onDelete }) => 
                   {event.description}
                 </Typography>
               </TableCell>
-              <TableCell sx={{ py: 1 }}>{event.location}</TableCell>
-              <TableCell sx={{ py: 1 }}>
+              <TableCell sx={{ py: cellPadding }}>{event.location}</TableCell>
+              <TableCell sx={{ py: cellPadding }}>
                 <Chip
                   label={event.status}
                   color={getStatusColor(event.status) as any}
@@ -172,19 +174,19 @@ const EventTable: React.FC<EventTableProps> = ({ events, onEdit, onDelete }) => 
                   sx={{ textTransform: 'capitalize', fontWeight: 500 }}
                 />
               </TableCell>
-              <TableCell sx={{ py: 1 }}>{formatDate(event.event_date)}</TableCell>
-              <TableCell sx={{ py: 1 }}>{event.event_time}</TableCell>
-              <TableCell sx={{ py: 1 }}>
-                <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+              <TableCell sx={{ py: cellPadding }}>{formatDate(event.event_date)}</TableCell>
+              <TableCell sx={{ py: cellPadding }}>{event.event_time}</TableCell>
+              <TableCell sx={{ py: cellPadding }}>
+                <Typography variant="caption" sx={{ fontSize: '0.70rem' }}>
                   {event.createdAt ? formatDateTime(event.createdAt) : '-'}
                 </Typography>
               </TableCell>
-              <TableCell sx={{ py: 1 }}>
+              <TableCell sx={{ py: cellPadding }}>
                 <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
                   {event.updatedAt ? formatDateTime(event.updatedAt) : '-'}
                 </Typography>
               </TableCell>
-              <TableCell sx={{ py: 1 }}>
+              <TableCell sx={{ py: cellPadding }}>
                 <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                   <IconButton
                     color="primary"
