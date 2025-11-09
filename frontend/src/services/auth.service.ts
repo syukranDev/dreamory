@@ -13,16 +13,18 @@ interface SignupRequest {
   profileImageUrl?: string
 }
 
-interface AuthResponse {
+export interface AuthUser {
+  id: number
+  fullName: string
+  email: string
+  profileImageUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AuthResponse {
   token: string
-  user: {
-    id: number
-    fullName: string
-    email: string
-    profileImageUrl: string | null
-    createdAt: string
-    updatedAt: string
-  }
+  user: AuthUser
 }
 
 export const authService = {
