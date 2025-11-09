@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Container,
   Typography,
@@ -8,39 +8,33 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import EventListView from '../components/EventListView';
 import EventDetailDialog from '../components/EventDetailDialog';
 import { eventService } from '../services/event.service';
 import type { Event } from '../types/event.types';
 
 function UserPortal() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await eventService.getAllEvents({
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['events'],
+    queryFn: () =>
+      eventService.getAllEvents({
         sortColumn: 'eventDate',
         sortOrder: 'asc',
         page: 1,
         pageSize: 99999999999,
-      });
-      setEvents(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch events');
-    } finally {
-      setLoading(false);
-    }
-  };
+      }),
+  });
+
+  const events = data?.data ?? [];
+  const errorMessage = isError
+    ? error instanceof Error
+      ? error.message
+      : (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to fetch events'
+    : null;
 
   const handleCardClick = (event: Event) => {
     setSelectedEvent(event);
@@ -53,7 +47,7 @@ function UserPortal() {
   };
 
   return (
-    <Box sx={{ width: '100%', height: '100vh', backgroundColor: '#f5f5f5', margin: 0, padding: 0 }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', backgroundColor: '#f5f5f5', margin: 0, padding: 0 }}>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -77,13 +71,13 @@ function UserPortal() {
           </Typography>
         </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3, mx: 2 }} onClose={() => setError(null)}>
-            {error}
+        {errorMessage && (
+          <Alert severity="error" sx={{ mb: 3, mx: 2 }}>
+            {errorMessage}
           </Alert>
         )}
 
-        {loading ? (
+        {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
             <CircularProgress />
           </Box>
