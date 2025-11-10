@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -25,17 +25,16 @@ import AddIcon from '@mui/icons-material/Add';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SearchIcon from '@mui/icons-material/Search';
 import type { SelectChangeEvent } from '@mui/material/Select';
+import { useQuery } from '@tanstack/react-query';
 import EventTable from '../components/EventTable';
 import EventDialog from '../components/EventDialog';
 import { eventService } from '../services/event.service';
-import type { Event, EventFormData, PaginationMeta } from '../types/event.types';
+import type { Event, EventFormData, PaginatedEventResponse, PaginationMeta } from '../types/event.types';
 import { useAuth } from '../context/AuthContext';
+import { useEventMutations } from '../query/event.mutations';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -45,39 +44,58 @@ function Dashboard() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [actionError, setActionError] = useState<string | null>(null);
   const { logout } = useAuth();
+  const { createEventMutation, updateEventMutation, deleteEventMutation } = useEventMutations();
+
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (typeof err === 'object' && err !== null) {
+      const response = (err as { response?: { data?: { message?: string } } }).response;
+      const message = response?.data?.message;
+      if (message) return message;
+    }
+    if (err instanceof Error && err.message) {
+      return err.message;
+    }
+    return fallback;
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const fetchEvents = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await eventService.getAllEvents({
+  const {
+    data: eventsResponse,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<PaginatedEventResponse>({
+    queryKey: [
+      'events',
+      {
+        sortColumn,
+        sortOrder,
+        keyword: debouncedSearchTerm || undefined,
+        page,
+        pageSize: rowsPerPage,
+      },
+    ],
+    queryFn: () =>
+      eventService.getAllEvents({
         sortColumn,
         sortOrder,
         keyword: debouncedSearchTerm || undefined,
         page: page + 1,
         pageSize: rowsPerPage,
-      });
-      setEvents(response.data);
-      setPagination(response.pagination);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch events');
-    } finally {
-      setLoading(false);
-    }
-  }, [sortColumn, sortOrder, debouncedSearchTerm, page, rowsPerPage]);
+      }),
+  });
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  const events = eventsResponse?.data ?? [];
+  const pagination: PaginationMeta | null = eventsResponse?.pagination ?? null;
+  const queryErrorMessage = isError ? getErrorMessage(error, 'Failed to fetch events') : null;
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -110,26 +128,24 @@ function Dashboard() {
   };
 
   const handleCreateEvent = async (formData: EventFormData) => {
+    setActionError(null);
     try {
-      setError(null);
-      await eventService.createEvent(formData);
-      await fetchEvents();
+      await createEventMutation.mutateAsync(formData);
       handleCloseDialog();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create event');
+    } catch (err) {
+      setActionError(getErrorMessage(err, 'Failed to create event'));
     }
   };
 
   const handleUpdateEvent = async (formData: EventFormData) => {
     if (!selectedEvent) return;
 
+    setActionError(null);
     try {
-      setError(null);
-      await eventService.updateEvent(selectedEvent.id, formData);
-      await fetchEvents();
+      await updateEventMutation.mutateAsync({ id: selectedEvent.id, data: formData });
       handleCloseDialog();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update event');
+    } catch (err) {
+      setActionError(getErrorMessage(err, 'Failed to update event'));
     }
   };
 
@@ -148,14 +164,13 @@ function Dashboard() {
 
   const handleDeleteConfirm = async () => {
     if (eventToDelete !== null) {
+      setActionError(null);
       try {
-        setError(null);
-        await eventService.deleteEvent(eventToDelete);
-        await fetchEvents();
+        await deleteEventMutation.mutateAsync(eventToDelete);
         setEventToDelete(null);
         setDeleteDialogOpen(false);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to delete event');
+      } catch (err) {
+        setActionError(getErrorMessage(err, 'Failed to delete event'));
         setEventToDelete(null);
         setDeleteDialogOpen(false);
       }
@@ -189,8 +204,10 @@ function Dashboard() {
     };
   };
 
+  const displayError = actionError ?? queryErrorMessage;
+
   return (
-    <Box sx={{ width: '100%', height: '100vh', backgroundColor: '#f5f5f5', margin: 0, padding: 0 }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', backgroundColor: '#f5f5f5', margin: 0, padding: 0 }}>
       <AppBar position="static">
         <Toolbar>
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
@@ -209,7 +226,7 @@ function Dashboard() {
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ width: '100%', height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ width: '100%', minHeight: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
         <Box
           sx={{
             display: 'flex',
@@ -247,12 +264,12 @@ function Dashboard() {
                 label="Sort by"
                 onChange={(event: SelectChangeEvent) => setSortColumn(event.target.value)}
               >
+                <MenuItem value="id">ID</MenuItem>
+                <MenuItem value="eventDate">Event Date</MenuItem>
                 <MenuItem value="createdAt">Created Date</MenuItem>
                 <MenuItem value="updatedAt">Updated Date</MenuItem>
-                <MenuItem value="eventDate">Event Date</MenuItem>
-                <MenuItem value="title">Title</MenuItem>
-                <MenuItem value="status">Status</MenuItem>
-                <MenuItem value="id">ID</MenuItem>
+                {/* <MenuItem value="title">Title</MenuItem>
+                <MenuItem value="status">Status</MenuItem> */}
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -278,13 +295,17 @@ function Dashboard() {
           </Box>
         </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mx: 1.5, mb: 1 }} onClose={() => setError(null)}>
-            {error}
+        {displayError && (
+          <Alert
+            severity="error"
+            sx={{ mx: 1.5, mb: 1 }}
+            onClose={actionError ? () => setActionError(null) : undefined}
+          >
+            {displayError}
           </Alert>
         )}
 
-        {loading ? (
+        {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <CircularProgress />
           </Box>
