@@ -103,7 +103,8 @@ export class EventsService {
         if (updateEventDto.title) updateData.title = updateEventDto.title;
         if (updateEventDto.description) updateData.description = updateEventDto.description;
         if (updateEventDto.location) updateData.location = updateEventDto.location;
-        if (updateEventDto.imageUrl) updateData.imageUrl = updateEventDto.imageUrl ?? null;
+        if (updateEventDto.imageUrl) updateData.imageUrl = updateEventDto.imageUrl 
+         else updateData.imageUrl = null;
         if (updateEventDto.status) updateData.status = updateEventDto.status;
         if (updateEventDto.event_date) updateData.eventDate = new Date(updateEventDto.event_date);
         if (updateEventDto.event_time) updateData.eventTime = updateEventDto.event_time;
