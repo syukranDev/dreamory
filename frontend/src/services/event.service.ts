@@ -1,6 +1,13 @@
 import axiosInstance from '../utils/axiosInstance'
 import { API_PATH } from '../utils/apiPath'
-import type { Event, EventFormData, EventResponse, PaginatedResponse, PaginatedEventResponse } from '../types/event.types'
+import type {
+  CreateEventDto,
+  Event,
+  EventFormData,
+  EventResponse,
+  PaginatedResponse,
+  PaginatedEventResponse,
+} from '../types/event.types'
 
 const transformEventResponse = (response: EventResponse): Event => {
   const eventDate = new Date(response.eventDate)
@@ -47,7 +54,7 @@ export const eventService = {
     return transformEventResponse(response.data)
   },
 
-  async createEvent(eventData: EventFormData): Promise<Event> {
+  async createEvent(eventData: CreateEventDto): Promise<Event> {
     const response = await axiosInstance.post<EventResponse>(
       API_PATH.EVENT.ADD_EVENT.path,
       eventData

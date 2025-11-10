@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryKey } from '@tanstack/react-query';
-import type { EventFormData } from '../types/event.types';
+import type { CreateEventDto, EventFormData } from '../types/event.types';
 import { eventService } from '../services/event.service';
 
 type UpdateEventVariables = {
@@ -12,7 +12,7 @@ export const useEventMutations = (queryKey: QueryKey = ['events']) => {
   const queryClient = useQueryClient();
 
   const createEventMutation = useMutation({
-    mutationFn: (formData: EventFormData) => eventService.createEvent(formData),
+    mutationFn: (dto: CreateEventDto) => eventService.createEvent(dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
     },
