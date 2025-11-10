@@ -4,6 +4,7 @@ export const API_PATH = {
     AUTH: {
         LOGIN: { path: '/api/v1/auth/login', method: 'POST' },
         SIGNUP: { path: '/api/v1/auth/signup', method: 'POST' },
+        ME: { path: '/api/v1/auth/me', method: 'GET' },
     },
     EVENT: {
         ADD_EVENT: { path: '/api/v1/events', method: 'POST' },

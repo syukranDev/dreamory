@@ -48,4 +48,8 @@ export class AuthService {
             user: newUser
         };
     }
+
+    async getAuthenticatedUser(userId: number) {
+        return this.usersService.findById(userId);
+    }
 }

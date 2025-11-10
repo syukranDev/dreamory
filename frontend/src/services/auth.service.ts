@@ -43,5 +43,10 @@ export const authService = {
     )
     return response.data
   },
+
+  async getCurrentUser(): Promise<AuthUser> {
+    const response = await axiosInstance.get<AuthUser>(API_PATH.AUTH.ME.path)
+    return response.data
+  },
 }
 
