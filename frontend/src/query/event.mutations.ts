@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryKey } from '@tanstack/react-query';
-import type { CreateEventDto, EventFormData } from '../types/event.types';
+import type { CreateEventDto, UpdateEventDto } from '../types/event.types';
 import { eventService } from '../services/event.service';
 
 type UpdateEventVariables = {
   id: number;
-  data: EventFormData;
+  data: UpdateEventDto;
 };
 
 export const useEventMutations = (queryKey: QueryKey = ['events']) => {

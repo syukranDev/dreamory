@@ -32,7 +32,7 @@ import { eventService } from '../services/event.service';
 import type { Event, EventFormData, PaginatedEventResponse, PaginationMeta } from '../types/event.types';
 import { useAuth } from '../context/AuthContext';
 import { useEventMutations } from '../query/event.mutations';
-import { toCreateEventDto } from '../transformers/event.transformer';
+import { toCreateEventDto, toUpdateEventDto } from '../transformers/event.transformer';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -144,7 +144,8 @@ function Dashboard() {
 
     setActionError(null);
     try {
-      await updateEventMutation.mutateAsync({ id: selectedEvent.id, data: formData });
+      const dto = toUpdateEventDto(formData);
+      await updateEventMutation.mutateAsync({ id: selectedEvent.id, data: dto });
       handleCloseDialog();
     } catch (err) {
       setActionError(getErrorMessage(err, 'Failed to update event'));
