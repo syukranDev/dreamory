@@ -44,6 +44,16 @@ export interface CreateEventDto {
   event_time: string;
 }
 
+export interface UpdateEventDto {
+  title?: string;
+  description?: string;
+  location?: string;
+  imageUrl?: string;
+  status?: string;
+  event_date?: string;
+  event_time?: string;
+}
+
 export interface PaginationMeta {
   total: number;
   page: number;

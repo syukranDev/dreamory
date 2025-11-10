@@ -3,10 +3,10 @@ import { API_PATH } from '../utils/apiPath'
 import type {
   CreateEventDto,
   Event,
-  EventFormData,
   EventResponse,
   PaginatedResponse,
   PaginatedEventResponse,
+  UpdateEventDto,
 } from '../types/event.types'
 
 const transformEventResponse = (response: EventResponse): Event => {
@@ -62,7 +62,7 @@ export const eventService = {
     return transformEventResponse(response.data)
   },
 
-  async updateEvent(id: number, eventData: EventFormData): Promise<Event> {
+  async updateEvent(id: number, eventData: UpdateEventDto): Promise<Event> {
     const path = API_PATH.EVENT.UPDATE_EVENT.path.replace(':id', id.toString())
     const response = await axiosInstance.patch<EventResponse>(path, eventData)
     return transformEventResponse(response.data)
