@@ -42,7 +42,7 @@ function App() {
               }
             />
             <Route path="/user_portal" element={<UserPortal />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<Navigate to="/user_portal" replace />} />
           </Routes>
         </Router>
       </AuthProvider>

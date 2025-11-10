@@ -163,16 +163,20 @@ function Login() {
               {loading ? <CircularProgress size={24} /> : 'Sign In'}
             </Button>
             <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ mb: 1 }}>
                 Don't have an account?{' '}
                 <Link to="/signup" style={{ textDecoration: 'none' }}>
                   Sign Up
                 </Link>
               </Typography>
-              <Typography variant="body2">
-                Want to see upcoming events? {' '}
-                <Link to="/user_portal" style={{ textDecoration: 'none' }}>Click here</Link>
-              </Typography>
+              <Button
+                component={Link}
+                to="/user_portal"
+                variant="outlined"
+                fullWidth
+              >
+                View All Events
+              </Button>
             </Box>
           </Box>
         </Paper>
