@@ -7,10 +7,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { token, initializing } = useAuth();
+  const { token, init } = useAuth();
   const location = useLocation();
 
-  if (initializing) {
+  if (init) {
     return null;
   }
 
