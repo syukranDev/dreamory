@@ -32,6 +32,7 @@ import { eventService } from '../services/event.service';
 import type { Event, EventFormData, PaginatedEventResponse, PaginationMeta } from '../types/event.types';
 import { useAuth } from '../context/AuthContext';
 import { useEventMutations } from '../query/event.mutations';
+import { toCreateEventDto } from '../transformers/event.transformer';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -130,7 +131,8 @@ function Dashboard() {
   const handleCreateEvent = async (formData: EventFormData) => {
     setActionError(null);
     try {
-      await createEventMutation.mutateAsync(formData);
+      const dto = toCreateEventDto(formData);
+      await createEventMutation.mutateAsync(dto);
       handleCloseDialog();
     } catch (err) {
       setActionError(getErrorMessage(err, 'Failed to create event'));

@@ -41,7 +41,6 @@ const EventDialog: React.FC<EventDialogProps> = ({
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm<EventFormData>({
     defaultValues: event || {
       title: '',
@@ -53,8 +52,6 @@ const EventDialog: React.FC<EventDialogProps> = ({
       event_time: '',
     },
   });
-
-  const imageUrl = watch('imageUrl');
 
   React.useEffect(() => {
     if (event) {
@@ -126,7 +123,13 @@ const EventDialog: React.FC<EventDialogProps> = ({
             <Controller
               name="title"
               control={control}
-              rules={{ required: 'Title is required' }}
+              rules={{
+                required: 'Title is required',
+                minLength: {
+                  value: 6,
+                  message: 'Title must be more than 5 characters',
+                },
+              }}
               render={({ field }) => (
                 <TextField
                   {...field}
@@ -141,7 +144,13 @@ const EventDialog: React.FC<EventDialogProps> = ({
             <Controller
               name="description"
               control={control}
-              rules={{ required: 'Description is required' }}
+              rules={{
+                required: 'Description is required',
+                minLength: {
+                  value: 11,
+                  message: 'Description must be more than 10 characters',
+                },
+              }}
               render={({ field }) => (
                 <TextField
                   {...field}
